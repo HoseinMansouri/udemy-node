@@ -1,21 +1,33 @@
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
+const sendGridTransport = require("nodemailer-sendgrid-transport");
+
 const User = require("../models/user");
 
+const transporter = nodemailer.createTransport(
+  sendGridTransport({
+    auth: {
+      api_key:
+        "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",
+    },
+  })
+);
+
 exports.getLogin = (req, res, next) => {
-  let message = req.flash("error");    
+  let message = req.flash("error");
   res.render("auth/login", {
     path: "/login",
     pageTitle: "Login",
-    errorMessage: message[0]
+    errorMessage: message[0],
   });
 };
 
 exports.getSignup = (req, res) => {
-  let message = req.flash("error");    
+  let message = req.flash("error");
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Sign up",
-    errorMessage: message[0]
+    errorMessage: message[0],
   });
 };
 
@@ -51,14 +63,17 @@ exports.postLogin = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 
-exports.postSignup = (req, res, next) => {
+exports.postSignup =async (req, res, next) => {
   let email = req.body.email;
   let password = req.body.password;
   let confirmPassword = req.body.confirmPassword;
   User.findOne({ email: email })
     .then((userDoc) => {
       if (userDoc) {
-        req.flash("error", "Email exists already! Please peak a different one.");
+        req.flash(
+          "error",
+          "Email exists already! Please peak a different one."
+        );
         return res.redirect("/signup");
       }
       return bcrypt
@@ -73,7 +88,14 @@ exports.postSignup = (req, res, next) => {
         })
         .then((result) => {
           res.redirect("/login");
+          transporter.sendMail({
+            to: email,
+            from: "shop@node-complete.com",
+            subject: "Sign-up successed!",
+            html: "<h1>You Successfully sign-up!</h1>",
+          });
         });
+        
     })
     .catch((err) => console.log(err));
 };
