@@ -29,6 +29,6 @@
     "nodemailer": "^6.4.10",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "pug": "^2.0.3",
-    "sequelize": "^5.0.0-beta.11"
+    "sequelize": "^6.6.5"
   }
 }
